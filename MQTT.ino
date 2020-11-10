@@ -2,136 +2,97 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
+//********* MQTT CONFIG *********//
+const char* mqtt_server ="ioticos.org";
+const int* mqtt_port = 1883;//puede modificarse
+const char* mqtt_use ="kiVzIgbjLKkpcuy";//puede modificarse
+const char* mqtt_pass ="LUBew37TNDmRlbA";//puede modificarse
+const char* root_topic_subscribe ="hwSd5AthTfleEd9/input";//puede modificarse
+const char* root_topic_publish ="hwSd5AthTfleEd9/output";//puede modificarse
 
-//**************************************
-//*********** MQTT CONFIG **************
-//**************************************
-const char *mqtt_server = "";
-const int mqtt_port = ;
-const char *mqtt_user = "";
-const char *mqtt_pass = "";
-const char *root_topic_subscribe = "";
-const char *root_topic_publish = "";
+//******* WIFI CONFIG ********//
+const char* ssid="BTS";
+const char* password="ddaeng_93J-HOPE"; 
 
-
-//**************************************
-//*********** WIFICONFIG ***************
-//**************************************
-const char* ssid = "";
-const char* password =  "";
-
-
-
-//**************************************
-//*********** GLOBALES   ***************
-//**************************************
+//*********** GLOBALES ***********//
 WiFiClient espClient;
 PubSubClient client(espClient);
 char msg[25];
 long count=0;
 
-
-//************************
-//** F U N C I O N E S ***
-//************************
-void callback(char* topic, byte* payload, unsigned int length);
-void reconnect();
+//********* FUNCIONES *********//
+void calback(char* topic, byte* payload, usingned int length);
+void reconnected();
 void setup_wifi();
 
 void setup() {
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server, mqtt_port);
-  client.setCallback(callback);
+  client.setCallcack(callback);
 }
 
 void loop() {
-  
-  if (!client.connected()) {
-    reconnect();
-  }
-
-  if (client.connected()){
-    String str = "La cuenta es -> " + String(count);
+  if(!client.connected()){
+    reconnected();
+    }
+   if(client.connected()){
+    String str="La cuenta es-> " + String(count);
     str.toCharArray(msg,25);
-    client.publish(root_topic_publish,msg);
     count++;
     delay(300);
-  }
-  client.loop();
+    }
+    client.loop();
 }
-
-
-
-
-//*****************************
-//***    CONEXION WIFI      ***
-//*****************************
+//********* CONEXION WIFI *********//
 void setup_wifi(){
   delay(10);
-  // Nos conectamos a nuestra red Wifi
   Serial.println();
-  Serial.print("Conectando a ssid: ");
-  Serial.println(ssid);
-
+  Serial.print("conectando a ssid: ");
+  Serial.println(ssdi);
   WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
+  while(WiFi.status() != WL_CONNECTED){
     delay(500);
     Serial.print(".");
+    }
+  Serial.print("");
+  Serial.println("Conectando a red WiFi");
+  Serial,print("Direccion IP: ");
+  Serial.println(WiFi.localIP());  
   }
-
-  Serial.println("");
-  Serial.println("Conectado a red WiFi!");
-  Serial.println("Dirección IP: ");
-  Serial.println(WiFi.localIP());
-}
-
-
-
-//*****************************
-//***    CONEXION MQTT      ***
-//*****************************
-
-void reconnect() {
-
-  while (!client.connected()) {
-    Serial.print("Intentando conexión Mqtt...");
-    // Creamos un cliente ID
-    String clientId = "IOTICOS_H_W_";
-    clientId += String(random(0xffff), HEX);
-    // Intentamos conectar
-    if (client.connect(clientId.c_str(),mqtt_user,mqtt_pass)) {
-      Serial.println("Conectado!");
-      // Nos suscribimos
-      if(client.subscribe(root_topic_subscribe)){
-        Serial.println("Suscripcion ok");
-      }else{
-        Serial.println("fallo Suscripciión");
-      }
-    } else {
-      Serial.print("falló :( con error -> ");
-      Serial.print(client.state());
-      Serial.println(" Intentamos de nuevo en 5 segundos");
-      delay(5000);
+//******** CONEXION MQTT ********//
+void reconnect(){
+  while(!client.connected(){
+      Serial.print("Intentando conexion Mqtt...");
+      String clientId="IOTICOS_H_W");
+      clientId += String(random(0xffff), HEX);
+      if(client.connect(clientID.c_str(), mqtt_user,mqtt_pass)){
+        Serial.println("Conectado!");
+        if(client.suscribe(root_topic_suscribe)){
+          Serial.println("Suscripcion ok");
+         }
+         else{
+            Serial.println("Fallo la Suscripcion");
+          }
+        }
+        else{
+            Serial.print("fallo :( con error ->");
+            Serial.print(client.state());
+            SErial.println(" Intentamos de nuevo en 5 segundos");
+            delay(5000);
+       }
     }
   }
-}
-
-
-//*****************************
-//***       CALLBACK        ***
-//*****************************
-
-void callback(char* topic, byte* payload, unsigned int length){
-  String incoming = "";
-  Serial.print("Mensaje recibido desde -> ");
-  Serial.print(topic);
-  Serial.println("");
-  for (int i = 0; i < length; i++) {
-    incoming += (char)payload[i];
-  }
-  incoming.trim();
-  Serial.println("Mensaje -> " + incoming);
-
-}
+  //******** CALLBACK *********//
+  void calback(char* topic, byte* payload, usigned int length){
+    String incoming="";
+    Serial.print("Mensaje recibido desde -> ");
+    Serial.print(topic);
+    Serial.println("");
+    for(int i=0; i<length; i++){
+      incoming+=(char)payload[i];
+      }
+      incoming.trim();
+      Serial.println("Mensaje ->"+ incoming);
+    }
+  
